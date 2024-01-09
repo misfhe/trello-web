@@ -10,7 +10,7 @@ import AttachmentIcon from '@mui/icons-material/Attachment'
 
 function Card({ card }) {
 
-  const shouldShowCardActions = () =>{
+  const shouldShowCardActions = () => {
     return !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
   }
 
