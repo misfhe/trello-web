@@ -111,7 +111,7 @@ function BoardBar( { board }) {
           <Tooltip title="Pink Angry Bird">
             <Avatar
               alt="Pink Angry Bird"
-              src="https://angrybirds2.rovio.com/hc/article_attachments/9422034471442" />
+              src="https://i.pinimg.com/originals/aa/a2/e7/aaa2e7456e9217353b84aff249d57979.jpg" />
           </Tooltip>
           <Tooltip title="Angry Bird">
             <Avatar
