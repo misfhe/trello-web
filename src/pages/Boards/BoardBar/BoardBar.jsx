@@ -103,7 +103,7 @@ function BoardBar( { board }) {
           <Tooltip title="Yellow Angry Bird">
             <Avatar
               alt="Yellow Angry Bird"
-              src="https://static.wikia.nocookie.net/angrybirds/images/a/a1/Yellow_23.png" />
+              src="https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png" />
           </Tooltip>
           <Tooltip title="Brown Angry Bird">
             <Avatar
@@ -118,12 +118,12 @@ function BoardBar( { board }) {
           <Tooltip title="Angry Bird">
             <Avatar
               alt="Angry Bird"
-              src="https://static.wikia.nocookie.net/angrybirds/images/a/a1/Yellow_23.png" />
+              src="https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png" />
           </Tooltip>
           <Tooltip title="Angry Bird">
             <Avatar
               alt="Angry Bird"
-              src="https://static.wikia.nocookie.net/angrybirds/images/a/a1/Yellow_23.png" />
+              src="https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png" />
           </Tooltip>
         </AvatarGroup>
       </Box>

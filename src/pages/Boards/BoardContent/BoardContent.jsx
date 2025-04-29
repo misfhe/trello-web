@@ -15,7 +15,8 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useEffect, useState } from 'react'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
+import { generatePlaceholderCard } from '~/utils/formatters'
 
 import Column from './ListColumns/Column/Column'
 import Card from './ListColumns/Column/ListCards/Card/Card'
@@ -83,14 +84,26 @@ function BoardContent({ board }) {
         //Xóa card ở cái column active
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId)
 
+
+        // Thêm PlaceholderCard vào vị trí index cũ nếu column bị rỗng
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
+
         //cập nhật lại mảng cardOrderIds
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
+
+      //nextOverColumn: column mới
       if (nextOverColumn) {
         //Xóa card ở cái column active
         nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId)
 
         //đối với trường họp dragEnd thì phải cập nhật lại columnId trong card sau khi kéo card giữa 2 column khác nhau
+        const rebuild_activeDraggingCardData = {
+          ...activeDraggingCardData,
+          columnId: nextOverColumn._id
+        }
 
         //Thêm card đang kéo vào overColumn vào vị trí index mới
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(
@@ -98,9 +111,12 @@ function BoardContent({ board }) {
           0,
           {
             ...activeDraggingCardData,
-            columnId: nextOverColumn._id
+            rebuild_activeDraggingCardData
           }
         )
+        //Xóa PlaceholderCard nếu có
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
+
         //cập nhật lại mảng cardOrderIds
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
