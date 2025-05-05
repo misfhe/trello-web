@@ -24,12 +24,12 @@ function Board() {
       <Container disableGutters maxWidth= {false} sx={{ height: '100vh' }}>
         <AppBar />
         {/* Optional Chaining -  Code mockData*/}
-        <BoardBar board={mockData?.board} />
-        <BoardContent board={mockData?.board}/>
+        {/* <BoardBar board={mockData?.board} />
+        <BoardContent board={mockData?.board}/> */}
 
         {/* Code gốc */}
-        {/* <BoardBar board={board} />
-        <BoardContent board={board}/> */}
+        <BoardBar board={board} />
+        <BoardContent board={board}/>
       </Container>
     </>
   )
