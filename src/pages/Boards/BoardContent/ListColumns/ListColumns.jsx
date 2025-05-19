@@ -8,18 +8,26 @@ import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 
-function ListColumns({ columns }) {
+function ListColumns({ columns, createNewColumn, createNewCard }) {
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
-      toast.error('asdasdasda')
+      toast.error('Please enter column title')
       return
     }
-    // Call API
+
+    const newColumnData = {
+      title: newColumnTitle
+    }
+    /** Gọi lên props function createNewColumn nằm ở component cha cao nhất
+     * Gọi luôn API ở đây thay vì việc phải gọi API lần lượt ngược lên các cấp trên
+     * Với việc sử dụng Redux thì code sẽ clean hơn
+     */
+    await createNewColumn(newColumnData)
 
     // Close form
     toggleOpenNewColumnForm()
@@ -47,7 +55,7 @@ function ListColumns({ columns }) {
         })}
         */}
 
-        {columns?.map(column => <Column key={column._id} column={column} />)}
+        {columns?.map(column => <Column key={column._id} column={column} createNewCard = {createNewCard}/>)}
         {!openNewColumnForm 
           ? <Box onClick={toggleOpenNewColumnForm} sx={{
             minWidth: '250px',
