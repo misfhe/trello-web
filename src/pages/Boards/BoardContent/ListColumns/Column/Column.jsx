@@ -25,7 +25,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import theme from '~/theme'
 
-function Column({ column }) {
+function Column({ column, createNewCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -57,12 +57,20 @@ function Column({ column }) {
 
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const addNewCard = () => {
+  const addNewCard = async() => {
     if (!newCardTitle) {
       toast.error('empty', {position: 'bottom-right'})
       return
     }
-    // Call API
+    const newCardData = {
+      title: newCardTitle,
+      columnId: column._id
+    }
+    /** Gọi lên props function createNewCard nằm ở component cha cao nhất
+     * Gọi luôn API ở đây thay vì việc phải gọi API lần lượt ngược lên các cấp trên
+     * Với việc sử dụng Redux thì code sẽ clean hơn
+     */
+    await createNewCard(newCardData)
 
     // Close form
     toggleOpenNewCardForm()

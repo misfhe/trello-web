@@ -52,8 +52,8 @@ function Card({ card }) {
         // overflow: 'unset',
         // display: card?.FE_PlaceholderCard ? 'none' : 'block',
         overflow: card?.FE_PlaceholderCard ? 'hidden' : 'unset',
-        // height: card?.FE_PlaceholderCard ? '0px' : 'unset',
-        border: '1px solid transparent',
+        height: card?.FE_PlaceholderCard ? '0px' : 'unset',
+        border: card?.FE_PlaceholderCard ? '0px' : '1px solid transparent',
         '&:hover': { borderColor: (theme) => theme.palette.primary.main }
       }}
     >
