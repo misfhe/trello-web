@@ -19,7 +19,6 @@ import DragHandleIcon from '@mui/icons-material/DragHandle'
 import ListCards from './ListCards/ListCards'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
-import { mapOrder } from '~/utils/sort'
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -49,15 +48,16 @@ function Column({ column, createNewCard }) {
   const handleClose = () => {
     setAnchorEl(null)
   }
-
-  const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
+  
+  //Đã sắp xếp ở component cao nhất
+  const orderedCards = column.cards
 
   const [openNewCardForm, setOpenNewCardForm] = useState(false)
   const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
 
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const addNewCard = async() => {
+  const addNewCard = () => {
     if (!newCardTitle) {
       toast.error('empty', {position: 'bottom-right'})
       return
@@ -70,7 +70,7 @@ function Column({ column, createNewCard }) {
      * Gọi luôn API ở đây thay vì việc phải gọi API lần lượt ngược lên các cấp trên
      * Với việc sử dụng Redux thì code sẽ clean hơn
      */
-    await createNewCard(newCardData)
+    createNewCard(newCardData)
 
     // Close form
     toggleOpenNewCardForm()
