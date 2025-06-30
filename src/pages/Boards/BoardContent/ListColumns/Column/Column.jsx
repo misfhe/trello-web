@@ -20,13 +20,20 @@ import ListCards from './ListCards/ListCards'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
 import { useConfirm } from 'material-ui-confirm'
-
-
+import { createNewCardAPI, deleteColumnDetailsAPI } from '~/apis'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import theme from '~/theme'
+import { cloneDeep } from 'lodash'
+import {
+  updateCurrentActiveBoard,
+  selectCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
-function Column({ column, createNewCard, deleteColumnDetails }) {
+function Column({ column }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -50,7 +57,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
   const handleClose = () => {
     setAnchorEl(null)
   }
-  
+
   //Đã sắp xếp ở component cao nhất
   const orderedCards = column.cards
 
@@ -59,20 +66,39 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!newCardTitle) {
-      toast.error('empty', {position: 'bottom-right'})
+      toast.error('empty', { position: 'bottom-right' })
       return
     }
     const newCardData = {
       title: newCardTitle,
       columnId: column._id
     }
-    /** Gọi lên props function createNewCard nằm ở component cha cao nhất
-     * Gọi luôn API ở đây thay vì việc phải gọi API lần lượt ngược lên các cấp trên
-     * Với việc sử dụng Redux thì code sẽ clean hơn
-     */
-    createNewCard(newCardData)
+
+    // Gọi API tạo mới card và làm lại dữ liệu State Board
+    const createdCard = await createNewCardAPI({
+      ...newCardData,
+      boardId: board._id
+    })
+
+    //cập nhật lại dữ liệu State Board
+    // Tương tự như createNewColumn, cần deep copy dữ liệu board để tránh lỗi
+    const newBoard = cloneDeep(board)
+    const columnToUpdate = newBoard.columns.find(column => column._id === createdCard.columnId)
+    if (columnToUpdate) {
+      //Nếu column rỗng (chứa placeholer-card)
+      if (columnToUpdate.cards.some(card => card.FE_PlaceholderCard)) {
+        columnToUpdate.cards = [createdCard]
+        columnToUpdate.cardOrderIds = [createdCard._id]
+      } else {
+        columnToUpdate.cards.push(createdCard)
+        columnToUpdate.cardOrderIds.push(createdCard._id)
+      }
+
+    }
+    // setBoard(newBoard)
+    dispatch(updateCurrentActiveBoard(newBoard))
 
     // Close form
     toggleOpenNewCardForm()
@@ -84,17 +110,24 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
   //Xử lý xóa một column và Cards bên trong column đó
   const handleDeleteColumn = () => {
     confirmDeleteColumn({
-      title: "Delete column?",
-      description: "Are you sure you want to delete column? ",
-      confirmationText: "Confirm",
-      cancellationText: "Cancel",
+      title: 'Delete column?',
+      description: 'Are you sure you want to delete column? ',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
       // confirmationKeyword: 'delete'
     }).then(() => {
-      deleteColumnDetails(column._id)
-      console.log(column._id)
-      console.log(column.title)
-    }).catch(() => {})
+      //Update dữ liệu state board
+      const newBoard = { ...board }
+      newBoard.columns = newBoard.columns.filter(c => c._id !== column._id)
+      newBoard.columnOrderIds = newBoard.columnOrderIds.filter(_id => _id !== column._id)
+      // setBoard(newBoard)
+      dispatch(updateCurrentActiveBoard(newBoard))
 
+      //Cập nhật API BE
+      deleteColumnDetailsAPI(column._id).then(res => {
+        toast.success(res?.deleteResult)
+      })
+    }).catch(() => {})
   }
 
   //bọc Box trong div + listener ở dưới Box để tránh việc bị flickering
