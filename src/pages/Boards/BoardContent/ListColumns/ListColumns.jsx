@@ -7,14 +7,26 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { createNewColumnAPI } from '~/apis'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import { cloneDeep } from 'lodash'
+import {
+  updateCurrentActiveBoard,
+  selectCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
-function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDetails }) {
+function ListColumns({ columns }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
+
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = () => {
+  //gọi API tạo mới column và làm lại dữ liệu State Board
+  const addNewColumn = async() => {
     if (!newColumnTitle) {
       toast.error('Please enter column title')
       return
@@ -23,11 +35,30 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDeta
     const newColumnData = {
       title: newColumnTitle
     }
-    /** Gọi lên props function createNewColumn nằm ở component cha cao nhất
-     * Gọi luôn API ở đây thay vì việc phải gọi API lần lượt ngược lên các cấp trên
-     * Với việc sử dụng Redux thì code sẽ clean hơn
-     */
-    createNewColumn(newColumnData)
+
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id
+    })
+
+    //khi tao column mới thì chưa có card nên cần tạo card placeholder
+    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+
+    // Error object is not extensible bởi vì dù đã copy/clone ra giá trị newBoard nhưng bản chất của spread operator là Shallow copy
+    // (vi phạm rule immutable trong Redux - yêu cầu không thay đổi trực tiếp dữ liệu state)
+    // tránh lỗi này có 2 cách
+    // 1. deep copy
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumn._id)
+
+    // 2. sử dụng array.concat() để nối mảng
+    // const newBoard = { ...board }
+    // newBoard.columns = newBoard.columns.concat([createdColumn])
+    // newBoard.columnOrderIds = newBoard.columnOrderIds.concat([createdColumn._id])
+
+    dispatch(updateCurrentActiveBoard(newBoard))
 
     // Close form
     toggleOpenNewColumnForm()
@@ -55,13 +86,9 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDeta
         })}
         */}
 
-        {columns?.map(column => <Column
-          key={column._id}
-          column={column} 
-          createNewCard = {createNewCard}
-          deleteColumnDetails = {deleteColumnDetails}
-        />)}
-        {!openNewColumnForm 
+        {columns?.map(column =>
+          <Column key={column._id} column={column} />)}
+        {!openNewColumnForm
           ? <Box onClick={toggleOpenNewColumnForm} sx={{
             minWidth: '250px',
             maxWidth: '250px',

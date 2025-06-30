@@ -26,14 +26,11 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-function BoardContent({ 
-  board, 
-  createNewColumn, 
-  createNewCard, 
-  moveColumns, 
-  moveCardInSameColumn, 
-  moveCardToDifferentColumn,
-  deleteColumnDetails
+function BoardContent({
+  board,
+  moveColumns,
+  moveCardInSameColumn,
+  moveCardToDifferentColumn
 }) {
   //https://docs.dndkit.com/api-documentation/sensors
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -53,10 +50,10 @@ function BoardContent({
   const [activeDragItemData, setActiveDragItemData] = useState(null)
   const [oldColumnWhenDraggingCard, setOldColumnWhenDraggingCard] = useState(null)
 
-  
+
   useEffect(() => {
     //board column đã sắp xếp ở component cao nhất
-      setOrderedColumns(board.columns)
+    setOrderedColumns(board.columns)
   }, [board])
 
   //Tìm column theo cardId
@@ -130,15 +127,15 @@ function BoardContent({
         //cập nhật lại mảng cardOrderIds
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
-      if(triggerAction === 'handleDragEnd') {
+      if (triggerAction === 'handleDragEnd') {
         //
         moveCardToDifferentColumn(
-          activeDraggingCardId, 
-          oldColumnWhenDraggingCard._id, 
-          nextOverColumn._id, 
+          activeDraggingCardId,
+          oldColumnWhenDraggingCard._id,
+          nextOverColumn._id,
           nextColumns
         )
-      }  
+      }
 
       return nextColumns
     })
@@ -259,7 +256,6 @@ function BoardContent({
       // https://github.com/clauderic/dnd-kit/blob/master/packages/sortable/src/utilities/arrayMove.ts
       const dndOrderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
 
-      
       //cập nhật lại state thứ tự cột
       setOrderedColumns(dndOrderedColumns)
 
@@ -295,12 +291,7 @@ function BoardContent({
         height: (theme) => theme.trello.boardContentHeight,
         p: '10px 0'
       }}>
-        <ListColumns
-          columns = { orderedColumns }
-          createNewColumn = {createNewColumn}
-          createNewCard = {createNewCard}
-          deleteColumnDetails = {deleteColumnDetails}
-        />
+        <ListColumns columns = { orderedColumns } />
         <DragOverlay dropAnimation={customDropAnimation}>
           {(!activeDragItemType) && null}
           {(activeDragItemType===ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column = {activeDragItemData}/>}

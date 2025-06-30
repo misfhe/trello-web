@@ -49,10 +49,10 @@ export const activeBoardSlice = createSlice({
 
         // Xử lý dữ liệu nếu cần thiết
         board.columns = mapOrder(board.columns, board.columnOrderIds, '_id')
-  
+
         board.columns.forEach(column => {
           //Cần xử lý khi column rỗng
-          if(isEmpty(column.cards)) {
+          if (isEmpty(column.cards)) {
             column.cards = [generatePlaceholderCard(column)]
             column.cardOrderIds = [generatePlaceholderCard(column)._id]
           } else {
